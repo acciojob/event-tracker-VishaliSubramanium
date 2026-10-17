@@ -35,17 +35,12 @@ const App = () => {
 
   const handleCreateEvent = () => {
     if (!title) return;
-    const eventDate = moment(selectedSlot.start);
-    const isPast = eventDate.isBefore(moment(), 'day');
-    const bgColor = isPast ? 'rgb(222, 105, 135)' : 'rgb(140, 189, 76)';
-
     const newEvent = {
+      id: Date.now() + Math.random(),
       title,
       location,
       start: selectedSlot.start,
       end: selectedSlot.end || selectedSlot.start,
-      isPast,
-      style: { backgroundColor: bgColor }
     };
 
     setEvents([...events, newEvent]);
@@ -55,7 +50,7 @@ const App = () => {
   const handleUpdateEvent = () => {
     if (!title) return;
     const updatedEvents = events.map((ev) => {
-      if (ev === selectedEvent) {
+      if (ev.id === selectedEvent.id) {
         return { ...ev, title, location };
       }
       return ev;
@@ -65,20 +60,23 @@ const App = () => {
   };
 
   const handleDeleteEvent = () => {
-    const updatedEvents = events.filter((ev) => ev !== selectedEvent);
+    const updatedEvents = events.filter((ev) => ev.id !== selectedEvent.id);
     setEvents(updatedEvents);
     setIsEditOpen(false);
   };
 
   const filteredEvents = events.filter((ev) => {
-    if (filter === 'past') return ev.isPast;
-    if (filter === 'upcoming') return !ev.isPast;
+    const isPast = moment(ev.start).isBefore(moment(), 'day');
+    if (filter === 'past') return isPast;
+    if (filter === 'upcoming') return !isPast;
     return true;
   });
 
   const eventStyleGetter = (event) => {
+    const isPast = moment(event.start).isBefore(moment(), 'day');
+    const backgroundColor = isPast ? 'rgb(222, 105, 135)' : 'rgb(140, 189, 76)';
     return {
-      style: event.style
+      style: { backgroundColor }
     };
   };
 
